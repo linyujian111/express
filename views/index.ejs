@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title><%= title %></title>
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+
+</head>
+<style>
+  #container {
+    width: 80px;
+    height: 80px;
+    border: 1px solid #ccc;
+  }
+
+  #container>img {
+    width: 80px;
+    height: 80px;
+
+  }
+</style>
+
+<script type="text/javascript" src="https://cdn.bootcss.com/axios/0.19.0-beta.1/axios.js"></script>
+
+<body>
+  <h1><%= title %></h1>
+  <p>Welcome to <%= title %></p>
+
+  <div id="container" onclick="choosefile();">
+    <div style="text-align:center"></div>
+    <input type="file" id="file0" style="display: none" onchange="selectedFile();">
+    <img id="preview1" src="" alt="">
+  </div>
+
+  <div onclick="toup();">上传</div>
+
+  <input id="pop_file" type="file" accept=".jpg,.jpeg,.png" onchange="uploadFile(event)" name="fileTrans" />
+
+  <img id="preview" src="" />
+
+  <form action="/uploads" method="post" enctype="multipart/form-data">
+
+    <input type="file" name="file" multiple />
+
+
+    <input type="submit" value="登录">
+
+  </form>
+</body>
+
+</html>
+
+<script>
+  function toup() {
+    const file = document.getElementById('file0');
+
+    const fileObj = file.files[0];
+    let a = new FormData();
+    a.append('file', fileObj)
+
+    axios.post('/uploads', a).then(res => {
+
+      console.log("res", res)
+    })
+
+  };
+
+  function choosefile() {
+    var f = document.getElementById("file0");
+    f.click();//因为被隐藏了，所以用一个函数调用模仿手动点击事件
+  };
+
+
+  function selectedFile() {
+
+    const file = document.getElementById('file0');
+
+    const fileObj = file.files[0];
+    let a = new FormData()
+    a.append('file', fileObj)
+
+
+
+    const windowURL = window.URL || window.webkitURL;
+
+    const img = document.getElementById('preview1');
+
+
+    if (file && fileObj) {
+      const dataURl = windowURL.createObjectURL(fileObj);
+
+
+      console.log(dataURl)
+      img.setAttribute('src', dataURl);
+
+    }
+
+
+    axios.post('/uploads', a, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      },
+      transformRequest: [function (data) {
+        return data
+      }],
+      onUploadProgress: progressEvent => {
+        let complete = (progressEvent.loaded / progressEvent.total * 100 | 0) + '%';
+        console.log('上传',complete)
+        // self.uploadMessage = '上传 ' + complete
+      }
+    }).then(res => {
+
+      console.log("res", res)
+    })
+
+  
+  };
+
+  function uploadFile(ev) {
+
+    var that = this;
+    const file = document.getElementById('pop_file');
+    const fileObj = file.files[0];
+
+    console.log(fileObj)
+
+    const windowURL = window.URL || window.webkitURL;
+
+    console.log(windowURL)
+
+    const img = document.getElementById('preview');
+
+
+    if (file && fileObj) {
+      const dataURl = windowURL.createObjectURL(fileObj);
+
+
+      console.log(dataURl)
+      img.setAttribute('src', dataURl);
+
+    }
+  }
+</script>
